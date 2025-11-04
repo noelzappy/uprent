@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Durations } from '~core/database'
   import type { WorkerResponse } from '~core/types'
-  import {  CommuteTimeBase } from '~ui/components'
+  import {  CommuteTime } from '~ui/components'
 
   let loading = false
   let durations: Durations | null = null
@@ -23,4 +23,4 @@
   }
 </script>
 
-<CommuteTimeBase {durations} {loading} load={load} />
+<CommuteTime {durations} {loading} load={load} />

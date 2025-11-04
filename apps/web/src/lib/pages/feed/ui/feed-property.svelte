@@ -1,8 +1,7 @@
 <script lang="ts">
   import { CashSVG, DimensionsSVG } from '~ui/assets'
   import type { Property } from '~core/database'
-  import { CommuteTime } from '$lib/widgets'
-
+  import { CommuteTime } from '~ui/components'
   export let property: Property
 </script>
 
@@ -28,8 +27,7 @@
           href={property.sourceURL}
           target="_blank"
           class=".font-semibold .text-primary"
-        >
-          {property.title}
+        >CommuteTime   {property.title}
         </a>
       </span>
       <span class=".text-gray-600">{property.cityName}</span>
