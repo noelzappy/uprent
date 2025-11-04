@@ -1,6 +1,6 @@
 <script lang="ts">
-  import api from '~api'
   import type { Durations } from '~core/database'
+  import type { WorkerResponse } from '~core/types'
   import { RouteSVG } from '~ui/assets'
   import { Button } from '~ui/components'
 
@@ -9,12 +9,18 @@
 
   const load = async () => {
     loading = true
-    const { data, error } = await api.commute.durations.get()
+    chrome.runtime.sendMessage(
+  {
+    action: 'fetchCommutes',
+  },
+  (response: WorkerResponse<Durations>) => {
     loading = false
-
-    if (error || data.status === 'error') return
-
-    durations = data.payload.durations
+    if (response.error || response.success === false) {
+      return;
+    }
+    durations = response.data || null;
+  }
+);
   }
 </script>
 
