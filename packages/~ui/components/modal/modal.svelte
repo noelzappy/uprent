@@ -29,7 +29,9 @@
           on:click={handleClose}
           type="button"
         >
-          <XSVG />
+          <XSVG 
+            class=".w-4 .h-4"
+          />
         </button>
       </div>
       
