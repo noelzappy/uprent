@@ -1,7 +1,7 @@
 <script lang="ts">
   import { CashSVG, DimensionsSVG } from '~ui/assets'
   import type { Property } from '~core/database'
-  import { CommuteTime } from '~ui/components'
+  import { CommuteTime } from '~ui/components/widgets'
   export let property: Property
 </script>
 
