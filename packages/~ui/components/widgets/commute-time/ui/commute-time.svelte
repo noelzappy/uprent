@@ -17,31 +17,24 @@
   export let durations: Durations | null = null
   export let addresses: Address[] = []
   export let maxDurations: MaxDurations = DefaultMaxDurations
+  export let showSettings = false
+  export let isExtension = false
   export let openSettings: (() => void) | undefined = undefined
-  
-  
-  let internalShowSettings = false
-  const isExtension = typeof window === 'undefined' && typeof (globalThis as any).chrome !== 'undefined'
+  export let onSaveSettings: ((newAddresses: Address[], newMaxDurations: MaxDurations) => void) | undefined = undefined
 
   onMount(() => {
-
     if (!isExtension) {
       addresses = commuteStorage.getAddresses()
       maxDurations = commuteStorage.getMaxDurations()
     }
-
   });
 
   export let load: () => Promise<void> | void = async () => {
-    if (!isExtension) {
-      
       addresses = commuteStorage.getAddresses()
-      
       if (addresses.length === 0) {
         handleOpenSettings()
         return
       }
-
       loading = true
       const { data, error } = await api.commute.durations.get({
         $query: {
@@ -49,18 +42,32 @@
         },
       })
       loading = false
-
       if (error || data.status === 'error') return
-
       durations = data.payload.durations
+  }
+
+  const handleSaveSettings = (newAddresses: Address[], newMaxDurations: MaxDurations) => {
+
+    if(onSaveSettings) {
+      onSaveSettings(newAddresses, newMaxDurations)
+      return
     }
+
+    addresses = newAddresses
+    maxDurations = newMaxDurations
+    commuteStorage.saveAddresses(newAddresses)
+    commuteStorage.saveMaxDurations(newMaxDurations)
+    showSettings = false
+      if (addresses.length > 0) {
+        load()
+      }
   }
 
   const handleOpenSettings = () => {
     if (openSettings) {
       openSettings()
     } else {
-      internalShowSettings = true
+      showSettings = true
     }
   }
 
@@ -87,26 +94,12 @@
     return max !== null && duration > max
   }
 
-    const handleSaveSettings = (newAddresses: Address[], newMaxDurations: MaxDurations) => {
-    addresses = newAddresses
-    maxDurations = newMaxDurations
-    commuteStorage.saveAddresses(newAddresses)
-    commuteStorage.saveMaxDurations(newMaxDurations)
-    internalShowSettings = false
-      if (addresses.length > 0) {
-        load()
-      }
-    }
-
   const travelModes: TravelMode[] = ['walking', 'biking', 'driving', 'transit']
-
 </script>
 
 <div>
-
-
   <CommuteSettingsModal 
-  bind:open={internalShowSettings}
+  bind:open={showSettings}
   {addresses}
   {maxDurations}
   onSave={

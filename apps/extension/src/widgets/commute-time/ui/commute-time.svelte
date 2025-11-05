@@ -2,11 +2,11 @@
   import { onMount } from 'svelte'
   import type { Durations, } from '~core/database'
   import type { WorkerResponse,  Address, MaxDurations } from '~core/types'
-  import { CommuteTime, CommuteSettingsModal } from '~ui/components/widgets'
+  import { CommuteTime, } from '~ui/components/widgets'
   import {
   DefaultMaxDurations,
-  STORAGE_KEYS,
 } from '~core/constants/commute-constants'
+  import { extensionCommuteStorage } from '@shared/stores'
 
   let loading = false
   let durations: Durations | null = null
@@ -14,29 +14,19 @@
   let maxDurations: MaxDurations = DefaultMaxDurations
   let showSettingsModal = false
 
-  onMount(() => {
-    chrome.storage.local.get(
-      [STORAGE_KEYS.ADDRESSES, STORAGE_KEYS.MAX_DURATIONS],
-      (result) => {
-        addresses = result[STORAGE_KEYS.ADDRESSES] || []
-        maxDurations = result[STORAGE_KEYS.MAX_DURATIONS] || DefaultMaxDurations
-        console.log('Loaded addresses and maxDurations from storage', {
-          addresses,
-          maxDurations,
-        })
-      }
-    )
+  onMount(async () => {
+   addresses = await extensionCommuteStorage.getAddresses()
+   maxDurations = await extensionCommuteStorage.getMaxDurations()
   })
 
-  const load = () => {
-    chrome.storage.local.get([STORAGE_KEYS.ADDRESSES], (result) => {
-      addresses = result[STORAGE_KEYS.ADDRESSES] || []
+  const load = async () => {
+
+      addresses = await extensionCommuteStorage.getAddresses()
 
       if (addresses.length === 0) {
         showSettingsModal = true
         return
       }
-
       loading = true
       chrome.runtime.sendMessage(
         {
@@ -50,21 +40,17 @@
           durations = response.data || null
         }
       )
-    })
   }
 
-  const handleSaveSettings = (newAddresses: Address[], newMaxDurations: MaxDurations) => {
+  const handleSaveSettings = async (newAddresses: Address[], newMaxDurations: MaxDurations) => {
     addresses = newAddresses
     maxDurations = newMaxDurations
-    chrome.storage.local.set({
-      [STORAGE_KEYS.ADDRESSES]: newAddresses,
-      [STORAGE_KEYS.MAX_DURATIONS]: newMaxDurations,
-    }, () => {
-      showSettingsModal = false
-      if (addresses.length > 0) {
-        load()
-      }
-    })
+    await extensionCommuteStorage.saveAddresses(newAddresses)
+    await extensionCommuteStorage.saveMaxDurations(newMaxDurations)
+    showSettingsModal = false
+    if (addresses.length > 0) {
+      await load()
+    }
   }
 
   const openSettings = () => {
@@ -73,11 +59,14 @@
 
 </script>
 
-<CommuteSettingsModal 
-  bind:open={showSettingsModal} 
-  {addresses}
-  {maxDurations}
-  onSave={handleSaveSettings}
+<CommuteTime 
+  bind:showSettings={showSettingsModal} 
+  {durations} 
+  {loading} 
+  {load} 
+  {addresses} 
+  {maxDurations} 
+  {openSettings} 
+  onSaveSettings={handleSaveSettings}
+  isExtension={true}
 />
-
-<CommuteTime {durations} {loading} {load} {addresses} {maxDurations} {openSettings} />
