@@ -1,6 +1,6 @@
-import type { TSchema } from '@sinclair/typebox'
 import { t } from '@schemas'
 import { withMiddleware } from './middleware'
+import { TSchema } from 'elysia'
 
 export const res = <TPayload extends TSchema>(payloadSchema: TPayload) => {
   return t.Union([

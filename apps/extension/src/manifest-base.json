@@ -11,35 +11,25 @@
     "cookies",
     "storage"
   ],
-  "host_permissions": [
-    "https://www.pararius.com/",
-    "https://www.pararius.nl/"
-  ],
+  "host_permissions": ["https://www.pararius.com/", "https://www.pararius.nl/"],
   "action": {
     "default_icon": "icons/192x192.png"
   },
   "background": {
-    "service_worker": "service-worker/background.js"
+    "service_worker": "service-worker/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content-scripts/main.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["content-scripts/main.js"],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "/fonts/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["/fonts/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

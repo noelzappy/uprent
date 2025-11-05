@@ -1,13 +1,12 @@
 <script lang="ts">
   import { CashSVG, DimensionsSVG } from '~ui/assets'
   import type { Property } from '~core/database'
-  import { CommuteTime } from '$lib/widgets'
-
+  import { CommuteTime } from '~ui/components/widgets'
   export let property: Property
 </script>
 
 <div
-  class=".relative .flex .h-[200px] .min-w-[540px] .grow .rounded-md .bg-white .text-left .shadow-md"
+  class=".relative .flex .h-[300px] .min-w-[540px] .grow .rounded-md .bg-white .text-left .shadow-md"
 >
   <span class=".contents">
     <span
@@ -28,8 +27,7 @@
           href={property.sourceURL}
           target="_blank"
           class=".font-semibold .text-primary"
-        >
-          {property.title}
+          >{property.title}
         </a>
       </span>
       <span class=".text-gray-600">{property.cityName}</span>
@@ -51,5 +49,7 @@
       {/if}
     </div>
   </div>
-  <CommuteTime />
+  <div class=".p-3">
+    <CommuteTime />
+  </div>
 </div>

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun -b run vite dev --host 0.0.0.0 --port 5000",
+    "dev": "bun -b run vite dev --host 0.0.0.0 --port 5005",
     "build": "vite build",
     "start": "HOST=:: PORT=5000 node .build",
     "lint": "eslint . && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
@@ -16,7 +16,7 @@
   "devDependencies": {
     "@sveltejs/adapter-node": "5.2.9",
     "@sveltejs/kit": "2.5.8",
-    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@sveltejs/vite-plugin-svelte": "3.1.0",
     "autoprefixer": "10.4.19",
     "eslint-config-custom": "workspace:*",
     "eslint-plugin-svelte": "2.39.0",

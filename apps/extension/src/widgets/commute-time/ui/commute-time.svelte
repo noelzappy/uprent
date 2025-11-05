@@ -1,31 +1,72 @@
 <script lang="ts">
-  import api from '~api'
-  import type { Durations } from '~core/database'
-  import { RouteSVG } from '~ui/assets'
-  import { Button } from '~ui/components'
+  import { onMount } from 'svelte'
+  import type { Durations, } from '~core/database'
+  import type { WorkerResponse,  Address, MaxDurations } from '~core/types'
+  import { CommuteTime, } from '~ui/components/widgets'
+  import {
+  DefaultMaxDurations,
+} from '~core/constants/commute-constants'
+  import { extensionCommuteStorage } from '@shared/stores'
 
   let loading = false
   let durations: Durations | null = null
+  let addresses: Address[] = []
+  let maxDurations: MaxDurations = DefaultMaxDurations
+  let showSettingsModal = false
+
+  onMount(async () => {
+   addresses = await extensionCommuteStorage.getAddresses()
+   maxDurations = await extensionCommuteStorage.getMaxDurations()
+  })
 
   const load = async () => {
-    loading = true
-    const { data, error } = await api.commute.durations.get()
-    loading = false
 
-    if (error || data.status === 'error') return
+      addresses = await extensionCommuteStorage.getAddresses()
 
-    durations = data.payload.durations
+      if (addresses.length === 0) {
+        showSettingsModal = true
+        return
+      }
+      loading = true
+      chrome.runtime.sendMessage(
+        {
+          action: 'fetchCommutes',
+        },
+        (response: WorkerResponse<Durations>) => {
+          loading = false
+          if (response.error || response.success === false) {
+            return
+          }
+          durations = response.data || null
+        }
+      )
   }
+
+  const handleSaveSettings = async (newAddresses: Address[], newMaxDurations: MaxDurations) => {
+    addresses = newAddresses
+    maxDurations = newMaxDurations
+    await extensionCommuteStorage.saveAddresses(newAddresses)
+    await extensionCommuteStorage.saveMaxDurations(newMaxDurations)
+    showSettingsModal = false
+    if (addresses.length > 0) {
+      await load()
+    }
+  }
+
+  const openSettings = () => {
+    showSettingsModal = true
+  }
+
 </script>
 
-<div>
-  {#if !durations}
-    <Button primary {loading} onClick={load}>
-      <RouteSVG slot="icon" />
-      Load commutes
-    </Button>
-  {:else}
-    <!-- TODO: make it pretty! -->
-    {JSON.stringify(durations, null, 2)}
-  {/if}
-</div>
+<CommuteTime 
+  bind:showSettings={showSettingsModal} 
+  {durations} 
+  {loading} 
+  {load} 
+  {addresses} 
+  {maxDurations} 
+  {openSettings} 
+  onSaveSettings={handleSaveSettings}
+  isExtension={true}
+/>
