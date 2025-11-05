@@ -27,7 +27,7 @@
           href={property.sourceURL}
           target="_blank"
           class=".font-semibold .text-primary"
-        >CommuteTime   {property.title}
+          >{property.title}
         </a>
       </span>
       <span class=".text-gray-600">{property.cityName}</span>
@@ -52,5 +52,4 @@
   <div class=".p-3">
     <CommuteTime />
   </div>
-  
 </div>
