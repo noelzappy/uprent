@@ -20,8 +20,7 @@
   
   
   let internalShowSettings = false
-  const isExtension = typeof window === 'undefined' && typeof (globalThis as any).chrome === 'undefined'
-
+  const isExtension = typeof window === 'undefined' && typeof (globalThis as any).chrome !== 'undefined'
 
   if (!isExtension) {
     addresses = commuteStorage.getAddresses()

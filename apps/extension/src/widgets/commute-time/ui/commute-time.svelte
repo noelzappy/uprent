@@ -10,15 +10,10 @@
   let loading = false
   let durations: Durations | null = null
   let addresses: Address[] = []
-  let maxDurations: MaxDurations = {
-    walking: null,
-    driving: null,
-    transit: null,
-    biking: null,
-  }
+  let maxDurations: MaxDurations = DefaultMaxDurations
   let showSettingsModal = false
 
-  // Load initial data from chrome.storage
+  
   chrome.storage.local.get(
     [STORAGE_KEYS.ADDRESSES, STORAGE_KEYS.MAX_DURATIONS],
     (result) => {
@@ -26,6 +21,8 @@
       maxDurations = result[STORAGE_KEYS.MAX_DURATIONS] || DefaultMaxDurations
     }
   )
+
+  console.log('Loaded stored commute settings', { addresses, maxDurations })
 
   const load = () => {
     // Reload addresses in case they changed
@@ -57,12 +54,11 @@
     addresses = newAddresses
     maxDurations = newMaxDurations
     
-    // Save to chrome.storage
     chrome.storage.local.set({
       [STORAGE_KEYS.ADDRESSES]: newAddresses,
       [STORAGE_KEYS.MAX_DURATIONS]: newMaxDurations,
     }, () => {
-      // If we now have addresses, reload commutes
+      showSettingsModal = false
       if (addresses.length > 0) {
         load()
       }
@@ -72,6 +68,10 @@
   const openSettings = () => {
     showSettingsModal = true
   }
+
+  console.log('CommuteTimeWidget initialized', { addresses, maxDurations })
+
+
 </script>
 
 <CommuteSettingsModal 

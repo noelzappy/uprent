@@ -6,7 +6,6 @@
   export let onClose: () => void = () => {}
 
   const handleClose = () => {
-    open = false
     onClose()
   }
 

@@ -15,7 +15,6 @@
   let addressInputs: string[] = localAddresses.map(a => a.label)
   let showSuggestions: boolean[] = []
   let filteredSuggestions: string[][] = []
-
   
   if (addressInputs.length === 0) {
     addressInputs = ['']
@@ -65,7 +64,6 @@
       }))
 
     onSave(validAddresses, localMaxDurations)
-    open = false
   }
 
   const handleClose = () => {
@@ -77,6 +75,7 @@
     }
     showSuggestions = addressInputs.map(() => false)
     filteredSuggestions = addressInputs.map(() => [])
+    open = false
   }
 </script>
 
