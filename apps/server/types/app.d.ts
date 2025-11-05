@@ -54,17 +54,21 @@ declare const app: import("elysia").default<"", false, {
 			get: {
 				body: unknown;
 				params: Record<never, string>;
-				query: unknown;
+				query: {
+					addressIds?: string | undefined;
+				};
 				headers: unknown;
 				response: {
 					200: {
 						status: "success";
 						payload: {
 							durations: {
-								walking: number | null;
-								driving: number | null;
-								transit: number | null;
-								biking: number | null;
+								[x: string]: {
+									walking: number | null;
+									driving: number | null;
+									transit: number | null;
+									biking: number | null;
+								};
 							};
 						};
 					};

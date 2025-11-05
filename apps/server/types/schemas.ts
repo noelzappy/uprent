@@ -10,11 +10,13 @@ export const PropertySchema = t.Object({
   previewImageURL: t.String(),
 })
 
-export const DurationsSchema = t.Object({
+export const DurationsByModeSchema = t.Object({
   walking: t.Union([t.Number(), t.Null()]),
   driving: t.Union([t.Number(), t.Null()]),
   transit: t.Union([t.Number(), t.Null()]),
   biking: t.Union([t.Number(), t.Null()]),
 })
+
+export const DurationsSchema = t.Record(t.String(), DurationsByModeSchema)
 
 export { t }
