@@ -17,29 +17,31 @@
 </script>
 
 {#if open}
-  <div 
+  <div
     class=".fixed .inset-0 .z-50 .flex .items-center .justify-center .bg-black .bg-opacity-50"
     on:click={handleBackdropClick}
   >
-    <div class=".bg-white .rounded-lg .shadow-xl .max-w-lg .w-full .mx-4 .max-h-[90vh] .overflow-hidden .flex .flex-col">
-      <div class=".flex .items-center .justify-between .p-4 .border-b .border-gray-200">
+    <div
+      class=".mx-4 .flex .max-h-[90vh] .w-full .max-w-lg .flex-col .overflow-hidden .rounded-lg .bg-white .shadow-xl"
+    >
+      <div
+        class=".flex .items-center .justify-between .border-b .border-gray-200 .p-4"
+      >
         <h2 class=".text-lg .font-semibold .text-gray-900">{title}</h2>
-        <button 
-          class=".p-1 .rounded-md hover:.bg-gray-100 .transition-colors"
+        <button
+          class=".rounded-md .p-1 .transition-colors hover:.bg-gray-100"
           on:click={handleClose}
           type="button"
         >
-          <XSVG 
-            class=".w-4 .h-4"
-          />
+          <XSVG class=".h-4 .w-4" />
         </button>
       </div>
-      
-      <div class=".p-4 .overflow-y-auto .flex-1">
+
+      <div class=".flex-1 .overflow-y-auto .p-4">
         <slot />
       </div>
-      
-      <div class=".flex .justify-end .gap-2 .p-4 .border-t .border-gray-200">
+
+      <div class=".flex .justify-end .gap-2 .border-t .border-gray-200 .p-4">
         <slot name="footer" close={handleClose} />
       </div>
     </div>
@@ -47,7 +49,7 @@
 {/if}
 
 <style>
-  :global(body:has(div[class*=".fixed"])) {
+  :global(body:has(div[class*='.fixed'])) {
     overflow: hidden;
   }
 </style>

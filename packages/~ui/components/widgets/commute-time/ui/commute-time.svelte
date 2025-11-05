@@ -1,8 +1,8 @@
 <script lang="ts">
   import api from '~api'
-  import type { Durations,  TravelMode, } from '~core/database'
+  import type { Durations, TravelMode } from '~core/database'
   import { commuteStorage } from '~core/helpers'
-  import { RouteSVG, SettingsSVG, } from '~ui/assets'
+  import { RouteSVG, SettingsSVG } from '~ui/assets'
   import { Button } from '~ui/components'
   import { WalkSVG } from '~ui/assets'
   import { BikeSVG } from '~ui/assets'
@@ -20,35 +20,37 @@
   export let showSettings = false
   export let isExtension = false
   export let openSettings: (() => void) | undefined = undefined
-  export let onSaveSettings: ((newAddresses: Address[], newMaxDurations: MaxDurations) => void) | undefined = undefined
+  export let onSaveSettings:
+    | ((newAddresses: Address[], newMaxDurations: MaxDurations) => void)
+    | undefined = undefined
 
-  onMount(() => {
-    if (!isExtension) {
-      addresses = commuteStorage.getAddresses()
-      maxDurations = commuteStorage.getMaxDurations()
-    }
-  });
+  onMount(async () => {
+    addresses = await commuteStorage.getAddresses()
+    maxDurations = await commuteStorage.getMaxDurations()
+  })
 
   export let load: () => Promise<void> | void = async () => {
-      addresses = commuteStorage.getAddresses()
-      if (addresses.length === 0) {
-        handleOpenSettings()
-        return
-      }
-      loading = true
-      const { data, error } = await api.commute.durations.get({
-        $query: {
-          addressIds: addresses.map(a => a.id).join(','),
-        },
-      })
-      loading = false
-      if (error || data.status === 'error') return
-      durations = data.payload.durations
+    addresses = commuteStorage.getAddresses()
+    if (addresses.length === 0) {
+      handleOpenSettings()
+      return
+    }
+    loading = true
+    const { data, error } = await api.commute.durations.get({
+      $query: {
+        addressIds: addresses.map(a => a.id).join(','),
+      },
+    })
+    loading = false
+    if (error || data.status === 'error') return
+    durations = data.payload.durations
   }
 
-  const handleSaveSettings = (newAddresses: Address[], newMaxDurations: MaxDurations) => {
-
-    if(onSaveSettings) {
+  const handleSaveSettings = (
+    newAddresses: Address[],
+    newMaxDurations: MaxDurations,
+  ) => {
+    if (onSaveSettings) {
       onSaveSettings(newAddresses, newMaxDurations)
       return
     }
@@ -58,9 +60,9 @@
     commuteStorage.saveAddresses(newAddresses)
     commuteStorage.saveMaxDurations(newMaxDurations)
     showSettings = false
-      if (addresses.length > 0) {
-        load()
-      }
+    if (addresses.length > 0) {
+      load()
+    }
   }
 
   const handleOpenSettings = () => {
@@ -73,19 +75,27 @@
 
   const getTravelModeIcon = (mode: TravelMode) => {
     switch (mode) {
-      case 'walking': return WalkSVG
-      case 'biking': return BikeSVG
-      case 'driving': return CarSVG
-      case 'transit': return RocketSVG
+      case 'walking':
+        return WalkSVG
+      case 'biking':
+        return BikeSVG
+      case 'driving':
+        return CarSVG
+      case 'transit':
+        return RocketSVG
     }
   }
 
   const getTravelModeLabel = (mode: TravelMode): string => {
     switch (mode) {
-      case 'walking': return 'Walking'
-      case 'biking': return 'Biking'
-      case 'driving': return 'Driving'
-      case 'transit': return 'Transit'
+      case 'walking':
+        return 'Walking'
+      case 'biking':
+        return 'Biking'
+      case 'driving':
+        return 'Driving'
+      case 'transit':
+        return 'Transit'
     }
   }
 
@@ -98,14 +108,12 @@
 </script>
 
 <div>
-  <CommuteSettingsModal 
-  bind:open={showSettings}
-  {addresses}
-  {maxDurations}
-  onSave={
-    handleSaveSettings
-  }
-/>
+  <CommuteSettingsModal
+    bind:open={showSettings}
+    {addresses}
+    {maxDurations}
+    onSave={handleSaveSettings}
+  />
 
   {#if !durations}
     <div class=".flex .gap-2">
@@ -118,48 +126,63 @@
       </Button>
     </div>
   {:else}
-    <div class=".flex .flex-col .h-full">
-      <div class=".flex .justify-between .items-center .mb-2 .flex-shrink-0">
+    <div class=".flex .h-full .flex-col">
+      <div class=".mb-2 .flex .flex-shrink-0 .items-center .justify-between">
         <h3 class=".text-sm .font-semibold .text-gray-900">Commute Times</h3>
-         <Button subtle onClick={handleOpenSettings}>
-        <SettingsSVG />
-      </Button>
+        <Button subtle onClick={handleOpenSettings}>
+          <SettingsSVG />
+        </Button>
       </div>
 
       {#if Object.keys(durations).length === 0}
-        <div class=".text-center .text-gray-500 .text-sm">
+        <div class=".text-center .text-sm .text-gray-500">
           No commute data available.
         </div>
       {:else}
-        <div class="{isExtension ? '.flex-1 .overflow-y-auto .space-y-3 .pr-1' : '.flex-1 .overflow-y-auto .flex .gap-3 .pr-1'}">
-        {#each Object.entries(durations) as [addressId, addressDurations]}
-          {@const address = addresses.find(a => a.id === addressId)}
-          <div class="{isExtension ? '.space-y-2' : '.space-y-2 .flex-1'}">
-            <div class=".text-xs .font-medium .text-gray-700" title={address?.label}>
-              {address?.label || 'Unknown address'}
-            </div>
-            <div class=".grid .grid-cols-2 .gap-2">
-              {#each travelModes as mode}
-                {@const duration = addressDurations[mode]}
-                {@const exceeded = duration !== null && isExceeded(mode, duration)}
-                {#if duration !== null}
-                  <div 
-                    class="{exceeded ? '.flex .items-center .gap-2 .p-2 .rounded-lg .border .transition-colors .bg-red-50 .border-red-300' : '.flex .items-center .gap-2 .p-2 .rounded-lg .border .transition-colors .bg-gray-50 .border-gray-200'}"
-                  >
-                    <svelte:component this={getTravelModeIcon(mode)} />
-                    <div class=".flex-1 .min-w-0">
-                      <div class=".text-xs .text-gray-500">{getTravelModeLabel(mode)}</div>
-                      <div class="{exceeded ? '.text-sm .font-medium .text-red-700' : '.text-sm .font-medium .text-gray-900'}">
-                        {duration} min
+        <div
+          class={isExtension
+            ? '.flex-1 .space-y-3 .overflow-y-auto .pr-1'
+            : '.flex .flex-1 .gap-3 .overflow-y-auto .pr-1'}
+        >
+          {#each Object.entries(durations) as [addressId, addressDurations]}
+            {@const address = addresses.find(a => a.id === addressId)}
+            <div class={isExtension ? '.space-y-2' : '.flex-1 .space-y-2'}>
+              <div
+                class=".text-xs .font-medium .text-gray-700"
+                title={address?.label}
+              >
+                {address?.label || 'Unknown address'}
+              </div>
+              <div class=".grid .grid-cols-2 .gap-2">
+                {#each travelModes as mode}
+                  {@const duration = addressDurations[mode]}
+                  {@const exceeded =
+                    duration !== null && isExceeded(mode, duration)}
+                  {#if duration !== null}
+                    <div
+                      class={exceeded
+                        ? '.flex .items-center .gap-2 .rounded-lg .border .border-red-300 .bg-red-50 .p-2 .transition-colors'
+                        : '.flex .items-center .gap-2 .rounded-lg .border .border-gray-200 .bg-gray-50 .p-2 .transition-colors'}
+                    >
+                      <svelte:component this={getTravelModeIcon(mode)} />
+                      <div class=".min-w-0 .flex-1">
+                        <div class=".text-xs .text-gray-500">
+                          {getTravelModeLabel(mode)}
+                        </div>
+                        <div
+                          class={exceeded
+                            ? '.text-sm .font-medium .text-red-700'
+                            : '.text-sm .font-medium .text-gray-900'}
+                        >
+                          {duration} min
+                        </div>
                       </div>
                     </div>
-              
-                  </div>
-                {/if}
-              {/each}
+                  {/if}
+                {/each}
+              </div>
             </div>
-          </div>
-        {/each}
+          {/each}
         </div>
       {/if}
     </div>

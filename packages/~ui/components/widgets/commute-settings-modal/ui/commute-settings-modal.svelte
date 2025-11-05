@@ -3,7 +3,10 @@
   import { Modal } from '~ui/components/modal'
   import { Button } from '~ui/components'
   import { PlusSVG, TrashSVG, MapPinSVG } from '~ui/assets'
-  import { DefaultMaxDurations, MockAddresses } from '~core/constants/commute-constants'
+  import {
+    DefaultMaxDurations,
+    MockAddresses,
+  } from '~core/constants/commute-constants'
 
   export let open: boolean = false
   export let addresses: Address[] = []
@@ -13,13 +16,14 @@
   let addressInputs: string[] = addresses.map(a => a.label)
   let showSuggestions: boolean[] = []
   let filteredSuggestions: string[][] = []
+  let previousOpen: boolean | undefined = undefined
 
   const handleAddressInput = (index: number, value: string) => {
     addressInputs[index] = value
-    
+
     if (value.trim().length > 0) {
-      filteredSuggestions[index] = MockAddresses.filter(addr => 
-        addr.toLowerCase().includes(value.toLowerCase())
+      filteredSuggestions[index] = MockAddresses.filter(addr =>
+        addr.toLowerCase().includes(value.toLowerCase()),
       )
       showSuggestions[index] = filteredSuggestions[index].length > 0
     } else {
@@ -67,46 +71,66 @@
     filteredSuggestions = addressInputs.map(() => [])
     open = false
   }
-</script>
 
+  $: if (open && previousOpen !== true) {
+    addressInputs = addresses.map(a => a.label)
+    if (addressInputs.length === 0) {
+      addressInputs = ['']
+    }
+    showSuggestions = addressInputs.map(() => false)
+    filteredSuggestions = addressInputs.map(() => [])
+    previousOpen = true
+  } else if (!open && previousOpen !== false) {
+    previousOpen = false
+  }
+</script>
 
 <Modal {open} title="Commute Settings" onClose={handleClose}>
   <div class=".space-y-6">
-    
     <div>
-      <h3 class=".text-sm .font-semibold .text-gray-900 .mb-3">Your Addresses</h3>
-      <p class=".text-xs .text-gray-500 .mb-3">Add up to 2 addresses to check commute times from.</p>
-      
+      <h3 class=".mb-3 .text-sm .font-semibold .text-gray-900">
+        Your Addresses
+      </h3>
+      <p class=".mb-3 .text-xs .text-gray-500">
+        Add up to 2 addresses to check commute times from.
+      </p>
+
       <div class=".space-y-3">
         {#each addressInputs as address, index}
           <div class=".relative">
             <div class=".flex .gap-2">
-              <div class=".flex-1 .relative">
+              <div class=".relative .flex-1">
                 <div class=".absolute .left-3 .top-2.5 .text-gray-400">
                   <MapPinSVG />
                 </div>
                 <input
                   type="text"
                   value={address}
-                  on:input={(e) => handleAddressInput(index, e.currentTarget.value)}
+                  on:input={e =>
+                    handleAddressInput(index, e.currentTarget.value)}
                   on:focus={() => {
-                    if (address.trim().length > 0 && filteredSuggestions[index]?.length > 0) {
+                    if (
+                      address.trim().length > 0 &&
+                      filteredSuggestions[index]?.length > 0
+                    ) {
                       showSuggestions[index] = true
                     }
                   }}
                   on:blur={() => {
-                    setTimeout(() => showSuggestions[index] = false, 200)
+                    setTimeout(() => (showSuggestions[index] = false), 200)
                   }}
                   placeholder="Enter address..."
-                  class=".w-full .pl-10 .pr-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
+                  class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .py-2 .pl-10 .pr-3 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
                 />
-                
+
                 {#if showSuggestions[index] && filteredSuggestions[index]?.length > 0}
-                  <div class=".absolute .z-10 .w-full .mt-1 .bg-white .border .border-gray-200 .rounded-md .shadow-lg .max-h-48 .overflow-y-auto">
+                  <div
+                    class=".absolute .z-10 .mt-1 .max-h-48 .w-full .overflow-y-auto .rounded-md .border .border-gray-200 .bg-white .shadow-lg"
+                  >
                     {#each filteredSuggestions[index] as suggestion}
                       <button
                         type="button"
-                        class=".w-full .text-left .px-3 .py-2 .text-sm .text-gray-700 hover:.bg-gray-50 .cursor-pointer"
+                        class=".w-full .cursor-pointer .px-3 .py-2 .text-left .text-sm .text-gray-700 hover:.bg-gray-50"
                         on:click={() => selectSuggestion(index, suggestion)}
                       >
                         {suggestion}
@@ -115,11 +139,11 @@
                   </div>
                 {/if}
               </div>
-              
+
               {#if addressInputs.length > 1 || (addressInputs.length === 1 && address.trim().length > 0)}
                 <button
                   type="button"
-                  class=".p-2 .text-red-600 hover:.bg-red-50 .rounded-md .transition-colors"
+                  class=".rounded-md .p-2 .text-red-600 .transition-colors hover:.bg-red-50"
                   on:click={() => removeAddress(index)}
                 >
                   <TrashSVG />
@@ -142,53 +166,65 @@
       </div>
     </div>
 
-    
     <div>
-      <h3 class=".text-sm .font-semibold .text-gray-900 .mb-3">Maximum Commute Times</h3>
-      <p class=".text-xs .text-gray-500 .mb-3">Set your maximum acceptable commute time for each travel mode (in minutes).</p>
-      
+      <h3 class=".mb-3 .text-sm .font-semibold .text-gray-900">
+        Maximum Commute Times
+      </h3>
+      <p class=".mb-3 .text-xs .text-gray-500">
+        Set your maximum acceptable commute time for each travel mode (in
+        minutes).
+      </p>
+
       <div class=".grid .grid-cols-2 .gap-3">
         <div>
-          <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Walking</label>
+          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
+            >Walking</label
+          >
           <input
             type="number"
             bind:value={maxDurations.walking}
             placeholder="e.g. 30"
             min="0"
-            class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
+            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
           />
         </div>
-        
+
         <div>
-          <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Biking</label>
+          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
+            >Biking</label
+          >
           <input
             type="number"
             bind:value={maxDurations.biking}
             placeholder="e.g. 20"
             min="0"
-            class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
+            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
           />
         </div>
-        
+
         <div>
-          <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Driving</label>
+          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
+            >Driving</label
+          >
           <input
             type="number"
             bind:value={maxDurations.driving}
             placeholder="e.g. 15"
             min="0"
-            class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
+            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
           />
         </div>
-        
+
         <div>
-          <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Transit</label>
+          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
+            >Transit</label
+          >
           <input
             type="number"
             bind:value={maxDurations.transit}
             placeholder="e.g. 25"
             min="0"
-            class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
+            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
           />
         </div>
       </div>
