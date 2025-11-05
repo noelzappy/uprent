@@ -117,7 +117,7 @@
 
   {#if !durations}
     <div class=".flex .gap-2">
-      <Button primary {loading} onClick={load} class=".flex-1">
+      <Button primary {loading} onClick={load} class=".max-w-60 .flex-1">
         <RouteSVG slot="icon" />
         Load commutes
       </Button>
