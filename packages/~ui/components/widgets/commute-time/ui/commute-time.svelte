@@ -2,7 +2,7 @@
   import api from '~api'
   import type { Durations,  TravelMode, } from '~core/database'
   import { commuteStorage } from '~core/helpers'
-  import { RouteSVG, SettingsSVG, AlertTriangleSVG } from '~ui/assets'
+  import { RouteSVG, SettingsSVG, } from '~ui/assets'
   import { Button } from '~ui/components'
   import { WalkSVG } from '~ui/assets'
   import { BikeSVG } from '~ui/assets'
@@ -118,8 +118,8 @@
       </Button>
     </div>
   {:else}
-    <div class=".space-y-4">
-      <div class=".flex .justify-between .items-center">
+    <div class=".flex .flex-col .h-full">
+      <div class=".flex .justify-between .items-center .mb-2 .flex-shrink-0">
         <h3 class=".text-sm .font-semibold .text-gray-900">Commute Times</h3>
          <Button subtle onClick={handleOpenSettings}>
         <SettingsSVG />
@@ -131,10 +131,11 @@
           No commute data available.
         </div>
       {:else}
+        <div class="{isExtension ? '.flex-1 .overflow-y-auto .space-y-3 .pr-1' : '.flex-1 .overflow-y-auto .flex .gap-3 .pr-1'}">
         {#each Object.entries(durations) as [addressId, addressDurations]}
           {@const address = addresses.find(a => a.id === addressId)}
-          <div class=".space-y-2">
-            <div class=".text-xs .font-medium .text-gray-700 .truncate" title={address?.label}>
+          <div class="{isExtension ? '.space-y-2' : '.space-y-2 .flex-1'}">
+            <div class=".text-xs .font-medium .text-gray-700" title={address?.label}>
               {address?.label || 'Unknown address'}
             </div>
             <div class=".grid .grid-cols-2 .gap-2">
@@ -143,30 +144,23 @@
                 {@const exceeded = duration !== null && isExceeded(mode, duration)}
                 {#if duration !== null}
                   <div 
-                    class=".flex .items-center .gap-2 .p-2 .rounded-lg .border .transition-colors"
-                    class:bg-red-50={exceeded}
-                    class:border-red-300={exceeded}
-                    class:bg-gray-50={!exceeded}
-                    class:border-gray-200={!exceeded}
+                    class="{exceeded ? '.flex .items-center .gap-2 .p-2 .rounded-lg .border .transition-colors .bg-red-50 .border-red-300' : '.flex .items-center .gap-2 .p-2 .rounded-lg .border .transition-colors .bg-gray-50 .border-gray-200'}"
                   >
                     <svelte:component this={getTravelModeIcon(mode)} />
                     <div class=".flex-1 .min-w-0">
                       <div class=".text-xs .text-gray-500">{getTravelModeLabel(mode)}</div>
-                      <div class=".text-sm .font-medium" class:text-red-700={exceeded} class:text-gray-900={!exceeded}>
+                      <div class="{exceeded ? '.text-sm .font-medium .text-red-700' : '.text-sm .font-medium .text-gray-900'}">
                         {duration} min
                       </div>
                     </div>
-                    {#if exceeded}
-                      <div class=".text-red-600" title="Exceeds your maximum">
-                        <AlertTriangleSVG />
-                      </div>
-                    {/if}
+              
                   </div>
                 {/if}
               {/each}
             </div>
           </div>
         {/each}
+        </div>
       {/if}
     </div>
   {/if}

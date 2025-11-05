@@ -6,7 +6,7 @@
 </script>
 
 <div
-  class=".relative .flex .h-[200px] .min-w-[540px] .grow .rounded-md .bg-white .text-left .shadow-md"
+  class=".relative .flex .h-[300px] .min-w-[540px] .grow .rounded-md .bg-white .text-left .shadow-md"
 >
   <span class=".contents">
     <span
@@ -52,4 +52,5 @@
   <div class=".p-3">
     <CommuteTime />
   </div>
+  
 </div>
