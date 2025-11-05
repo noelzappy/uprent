@@ -11,6 +11,7 @@
   import type { Address, MaxDurations } from '~core/types'
   import { DefaultMaxDurations } from '~core/constants/commute-constants'
   import { CommuteSettingsModal } from '~ui/components/widgets'
+  import { onMount } from 'svelte'
 
   export let loading: boolean = false
   export let durations: Durations | null = null
@@ -22,14 +23,17 @@
   let internalShowSettings = false
   const isExtension = typeof window === 'undefined' && typeof (globalThis as any).chrome !== 'undefined'
 
-  if (!isExtension) {
-    addresses = commuteStorage.getAddresses()
-    maxDurations = commuteStorage.getMaxDurations()
-  }
+  onMount(() => {
+
+    if (!isExtension) {
+      addresses = commuteStorage.getAddresses()
+      maxDurations = commuteStorage.getMaxDurations()
+    }
+
+  });
 
   export let load: () => Promise<void> | void = async () => {
     if (!isExtension) {
-
       
       addresses = commuteStorage.getAddresses()
       

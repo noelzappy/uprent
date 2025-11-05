@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import type { Durations, } from '~core/database'
   import type { WorkerResponse,  Address, MaxDurations } from '~core/types'
   import { CommuteTime, CommuteSettingsModal } from '~ui/components/widgets'
@@ -13,19 +14,21 @@
   let maxDurations: MaxDurations = DefaultMaxDurations
   let showSettingsModal = false
 
-  
-  chrome.storage.local.get(
-    [STORAGE_KEYS.ADDRESSES, STORAGE_KEYS.MAX_DURATIONS],
-    (result) => {
-      addresses = result[STORAGE_KEYS.ADDRESSES] || []
-      maxDurations = result[STORAGE_KEYS.MAX_DURATIONS] || DefaultMaxDurations
-    }
-  )
-
-  console.log('Loaded stored commute settings', { addresses, maxDurations })
+  onMount(() => {
+    chrome.storage.local.get(
+      [STORAGE_KEYS.ADDRESSES, STORAGE_KEYS.MAX_DURATIONS],
+      (result) => {
+        addresses = result[STORAGE_KEYS.ADDRESSES] || []
+        maxDurations = result[STORAGE_KEYS.MAX_DURATIONS] || DefaultMaxDurations
+        console.log('Loaded addresses and maxDurations from storage', {
+          addresses,
+          maxDurations,
+        })
+      }
+    )
+  })
 
   const load = () => {
-    // Reload addresses in case they changed
     chrome.storage.local.get([STORAGE_KEYS.ADDRESSES], (result) => {
       addresses = result[STORAGE_KEYS.ADDRESSES] || []
 
@@ -53,7 +56,6 @@
   const handleSaveSettings = (newAddresses: Address[], newMaxDurations: MaxDurations) => {
     addresses = newAddresses
     maxDurations = newMaxDurations
-    
     chrome.storage.local.set({
       [STORAGE_KEYS.ADDRESSES]: newAddresses,
       [STORAGE_KEYS.MAX_DURATIONS]: newMaxDurations,
@@ -68,9 +70,6 @@
   const openSettings = () => {
     showSettingsModal = true
   }
-
-  console.log('CommuteTimeWidget initialized', { addresses, maxDurations })
-
 
 </script>
 

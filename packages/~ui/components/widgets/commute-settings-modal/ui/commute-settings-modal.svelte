@@ -10,17 +10,9 @@
   export let maxDurations: MaxDurations = DefaultMaxDurations
   export let onSave: (addresses: Address[], maxDurations: MaxDurations) => void
 
-  let localAddresses: Address[] = [...addresses]
-  let localMaxDurations: MaxDurations = { ...maxDurations }
-  let addressInputs: string[] = localAddresses.map(a => a.label)
+  let addressInputs: string[] = addresses.map(a => a.label)
   let showSuggestions: boolean[] = []
   let filteredSuggestions: string[][] = []
-  
-  if (addressInputs.length === 0) {
-    addressInputs = ['']
-    showSuggestions = [false]
-    filteredSuggestions = [[]]
-  }
 
   const handleAddressInput = (index: number, value: string) => {
     addressInputs[index] = value
@@ -59,17 +51,15 @@
     const validAddresses: Address[] = addressInputs
       .filter(addr => addr.trim().length > 0)
       .map((addr, idx) => ({
-        id: localAddresses[idx]?.id || `addr-${Date.now()}-${idx}`,
+        id: addresses[idx]?.id || `addr-${Date.now()}-${idx}`,
         label: addr,
       }))
 
-    onSave(validAddresses, localMaxDurations)
+    onSave(validAddresses, maxDurations)
   }
 
   const handleClose = () => {
-    localAddresses = [...addresses]
-    localMaxDurations = { ...maxDurations }
-    addressInputs = localAddresses.map(a => a.label)
+    addressInputs = addresses.map(a => a.label)
     if (addressInputs.length === 0) {
       addressInputs = ['']
     }
@@ -78,6 +68,7 @@
     open = false
   }
 </script>
+
 
 <Modal {open} title="Commute Settings" onClose={handleClose}>
   <div class=".space-y-6">
@@ -141,7 +132,11 @@
         {#if addressInputs.length < 2}
           <Button subtle onClick={addAddress} class=".w-full">
             <PlusSVG slot="icon" />
-            Add another address
+            {#if addressInputs.length === 0}
+              Add an address
+            {:else}
+              Add another address
+            {/if}
           </Button>
         {/if}
       </div>
@@ -157,7 +152,7 @@
           <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Walking</label>
           <input
             type="number"
-            bind:value={localMaxDurations.walking}
+            bind:value={maxDurations.walking}
             placeholder="e.g. 30"
             min="0"
             class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
@@ -168,7 +163,7 @@
           <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Biking</label>
           <input
             type="number"
-            bind:value={localMaxDurations.biking}
+            bind:value={maxDurations.biking}
             placeholder="e.g. 20"
             min="0"
             class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
@@ -179,7 +174,7 @@
           <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Driving</label>
           <input
             type="number"
-            bind:value={localMaxDurations.driving}
+            bind:value={maxDurations.driving}
             placeholder="e.g. 15"
             min="0"
             class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
@@ -190,7 +185,7 @@
           <label class=".block .text-xs .font-medium .text-gray-700 .mb-1">Transit</label>
           <input
             type="number"
-            bind:value={localMaxDurations.transit}
+            bind:value={maxDurations.transit}
             placeholder="e.g. 25"
             min="0"
             class=".w-full .px-3 .py-2 .border .border-gray-300 .rounded-md .text-sm focus:.outline-none focus:.ring-2 focus:.ring-primary-500 focus:.border-transparent"
