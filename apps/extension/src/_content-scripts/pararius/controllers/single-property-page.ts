@@ -1,5 +1,5 @@
 import { SinglePropertyPageController } from '@features'
-import { CommuteTime } from '@widgets'
+import { CommuteTimeExtended } from '@widgets'
 
 class ParariusController extends SinglePropertyPageController {
   initialized = false
@@ -33,7 +33,7 @@ class ParariusController extends SinglePropertyPageController {
     travelTimeTarget.classList.add('uprent-pararius-travel-time')
     commuteButtonContainer.append(travelTimeTarget)
 
-    new CommuteTime({
+    new CommuteTimeExtended({
       target: travelTimeTarget,
     })
   }

@@ -49,5 +49,7 @@
       {/if}
     </div>
   </div>
-  <CommuteTime />
+  <div class=".p-3">
+    <CommuteTime />
+  </div>
 </div>

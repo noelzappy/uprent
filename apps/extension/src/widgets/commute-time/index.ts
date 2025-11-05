@@ -1,1 +1,1 @@
-export { default as CommuteTime } from './ui/commute-time.svelte'
+export { default as CommuteTimeExtended } from './ui/commute-time.svelte'
