@@ -47,9 +47,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  :global(body:has(div[class*='.fixed'])) {
-    overflow: hidden;
-  }
-</style>

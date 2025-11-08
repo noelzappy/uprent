@@ -95,6 +95,10 @@
     line-height: 1.3;
     color: #211e1e;
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    --c_selection-fg: #ffffff;
+    --c_selection-bg: #bd2e4f;
   }
 
   body {
