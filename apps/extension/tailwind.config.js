@@ -5,7 +5,6 @@ export default {
   content: [
     './src/**/*.{html,svelte,ts}',
     '../../packages/~ui/**/*.{html,svelte,ts}',
-    '../../packages/~i18n/**/*.ts',
   ],
   prefix: '.',
   theme: {
