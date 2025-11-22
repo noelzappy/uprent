@@ -1,8 +1,13 @@
 import { cors } from '@elysiajs/cors'
 import { Elysia } from 'elysia'
 import { Database } from 'bun:sqlite'
+import { initDatabase } from './db-init'
 
 const allowedOriginRegex = /http:\/\/localhost:\d+/
+
+const database = new Database('./db.sqlite')
+
+initDatabase(database)
 
 export const setup = new Elysia({ name: 'setup' })
   .use(
@@ -24,6 +29,6 @@ export const setup = new Elysia({ name: 'setup' })
       ],
     }),
   )
-  .decorate('db', new Database('./db.sqlite'))
+  .decorate('db', database)
 
 export type AppWithSetup = typeof setup
