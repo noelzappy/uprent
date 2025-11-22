@@ -11,6 +11,7 @@ export default {
     extend: {},
   },
   plugins: [],
+  important: '.uprent-scope',
   corePlugins: {
     preflight: false,
   },

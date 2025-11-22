@@ -31,6 +31,7 @@ class ParariusController extends SinglePropertyPageController {
     const travelTimeTarget = document.createElement('div')
     travelTimeTarget.classList.add('uprent-travel-time')
     travelTimeTarget.classList.add('uprent-pararius-travel-time')
+    travelTimeTarget.classList.add('uprent-scope')
     commuteButtonContainer.append(travelTimeTarget)
 
     new CommuteTimeExtended({

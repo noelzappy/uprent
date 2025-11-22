@@ -1,21 +1,83 @@
 @import '~ui/styles/tailwind';
 
-.uprent {
-  box-sizing: border-box !important;
+// Scoped Preflight / Reset
+.uprent-scope {
   font-family: 'Poppins', sans-serif;
-  outline: none;
-}
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  &,
+  * {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: #e5e7eb; // Tailwind default border color
+  }
 
-button.uprent {
-  border-style: solid !important;
-  border-width: 0;
-  cursor: pointer;
-}
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+  }
 
-input.uprent {
-  border-style: solid !important;
-}
+  button,
+  [role='button'] {
+    cursor: pointer;
+    background-color: transparent;
+    background-image: none;
+  }
 
-.uprent-hidden {
-  display: none !important;
+  img,
+  svg,
+  video,
+  canvas,
+  audio,
+  iframe,
+  embed,
+  object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .uprent-hidden {
+    display: none !important;
+  }
 }
