@@ -19,4 +19,19 @@ export const DurationsByModeSchema = t.Object({
 
 export const DurationsSchema = t.Record(t.String(), DurationsByModeSchema)
 
+export const PreferencesSchema = t.Object({
+  addresses: t.Array(
+    t.Object({
+      id: t.String(),
+      label: t.String(),
+    }),
+  ),
+  maxDurations: t.Object({
+    walking: t.Union([t.Number(), t.Null()]),
+    biking: t.Union([t.Number(), t.Null()]),
+    driving: t.Union([t.Number(), t.Null()]),
+    transit: t.Union([t.Number(), t.Null()]),
+  }),
+})
+
 export { t }

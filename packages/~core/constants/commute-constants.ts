@@ -24,3 +24,7 @@ export const MockAddresses = [
   '369 Amsterdam Ave, New York, NY 10024',
   '741 West End Ave, New York, NY 10025',
 ] as const
+
+export const HAND_SHAKE_KEY = 'uprent-commute-extension-handshake-key'
+
+export const WEB_APP_READY_EVENT_NAME = 'UPRENT_WEB_APP_READY'

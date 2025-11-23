@@ -1,7 +1,5 @@
 <script lang="ts">
-  import api from '~api'
   import type { Durations, TravelMode } from '~core/database'
-  import { commuteStorage } from '~core/helpers'
   import { RouteSVG, SettingsSVG } from '~ui/assets'
   import { Button } from '~ui/components'
   import { WalkSVG } from '~ui/assets'
@@ -9,68 +7,29 @@
   import { CarSVG } from '~ui/assets'
   import { RocketSVG } from '~ui/assets'
   import type { Address, MaxDurations } from '~core/types'
-  import { DefaultMaxDurations } from '~core/constants/commute-constants'
   import { CommuteSettingsModal } from '~ui/components/widgets'
-  import { onMount } from 'svelte'
 
-  export let loading: boolean = false
-  export let durations: Durations | null = null
-  export let addresses: Address[] = []
-  export let maxDurations: MaxDurations = DefaultMaxDurations
-  export let showSettings = false
+  export let loading: boolean
+  export let durations: Durations | null
+  export let addresses: Address[]
+  export let maxDurations: MaxDurations
+  export let showSettings: boolean
   export let isExtension = false
-  export let openSettings: (() => void) | undefined = undefined
-  export let onSaveSettings:
-    | ((newAddresses: Address[], newMaxDurations: MaxDurations) => void)
-    | undefined = undefined
+  export let onSaveSettings: (
+    newAddresses: Address[],
+    newMaxDurations: MaxDurations,
+  ) => void
+  export let load: () => Promise<void> | void
 
-  onMount(async () => {
-    addresses = await commuteStorage.getAddresses()
-    maxDurations = await commuteStorage.getMaxDurations()
-  })
-
-  export let load: () => Promise<void> | void = async () => {
-    addresses = commuteStorage.getAddresses()
-    if (addresses.length === 0) {
-      handleOpenSettings()
-      return
-    }
-    loading = true
-    const { data, error } = await api.commute.durations.get({
-      $query: {
-        addressIds: addresses.map(a => a.id).join(','),
-      },
-    })
-    loading = false
-    if (error || data.status === 'error') return
-    durations = data.payload.durations
+  const toggleSettings = () => {
+    showSettings = !showSettings
   }
 
   const handleSaveSettings = (
     newAddresses: Address[],
     newMaxDurations: MaxDurations,
   ) => {
-    if (onSaveSettings) {
-      onSaveSettings(newAddresses, newMaxDurations)
-      return
-    }
-
-    addresses = newAddresses
-    maxDurations = newMaxDurations
-    commuteStorage.saveAddresses(newAddresses)
-    commuteStorage.saveMaxDurations(newMaxDurations)
-    showSettings = false
-    if (addresses.length > 0) {
-      load()
-    }
-  }
-
-  const handleOpenSettings = () => {
-    if (openSettings) {
-      openSettings()
-    } else {
-      showSettings = true
-    }
+    onSaveSettings(newAddresses, newMaxDurations)
   }
 
   const getTravelModeIcon = (mode: TravelMode) => {
@@ -121,7 +80,7 @@
         <RouteSVG slot="icon" />
         Load commutes
       </Button>
-      <Button subtle onClick={handleOpenSettings}>
+      <Button subtle onClick={toggleSettings}>
         <SettingsSVG />
       </Button>
     </div>
@@ -129,7 +88,7 @@
     <div class=".flex .h-full .flex-col">
       <div class=".mb-2 .flex .flex-shrink-0 .items-center .justify-between">
         <h3 class=".text-sm .font-semibold .text-gray-900">Commute Times</h3>
-        <Button subtle onClick={handleOpenSettings}>
+        <Button subtle onClick={toggleSettings}>
           <SettingsSVG />
         </Button>
       </div>

@@ -1,10 +1,11 @@
 <script lang="ts">
   import { FeedProperties } from '.'
-  import { feed } from '$lib/shared/stores'
+  import { feed, preferences } from '$lib/shared/stores'
   import { onMount } from 'svelte'
 
   onMount(() => {
     feed.reload()
+    preferences.init()
   })
 </script>
 

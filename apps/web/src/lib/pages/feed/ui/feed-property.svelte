@@ -1,8 +1,47 @@
 <script lang="ts">
   import { CashSVG, DimensionsSVG } from '~ui/assets'
-  import type { Property } from '~core/database'
+  import type { Durations, Property } from '~core/database'
   import { CommuteTime } from '~ui/components/widgets'
+  import type { Address, MaxDurations } from '~core/types'
+  import { preferences } from '$lib/shared/stores'
+  import api from '~api'
   export let property: Property
+  let loadingCommutes: boolean = false
+  let showCommuteSettings: boolean = false
+
+  const addresses = $preferences.addresses
+  const maxDurations = $preferences.maxDurations
+  let durations: Durations | null = null
+
+  const loadCommutes = async () => {
+    if (addresses.length === 0) {
+      showCommuteSettings = true
+      return
+    }
+    loadingCommutes = true
+    const { data, error } = await api.commute.durations.get({
+      $query: {
+        addressIds: addresses.map(a => a.id).join(','),
+      },
+    })
+    loadingCommutes = false
+    if (error || data.status === 'error') return
+    durations = data.payload.durations
+  }
+
+  const handleSaveSettings = async (
+    newAddresses: Address[],
+    newMaxDurations: MaxDurations,
+  ) => {
+    showCommuteSettings = false
+    loadingCommutes = true
+    await preferences.save(newAddresses, newMaxDurations)
+    if (newAddresses.length === 0) {
+      loadingCommutes = false
+      return
+    }
+    await loadCommutes()
+  }
 </script>
 
 <div
@@ -50,6 +89,14 @@
     </div>
   </div>
   <div class=".p-3">
-    <CommuteTime />
+    <CommuteTime
+      onSaveSettings={handleSaveSettings}
+      bind:showSettings={showCommuteSettings}
+      load={loadCommutes}
+      {durations}
+      loading={loadingCommutes}
+      {addresses}
+      {maxDurations}
+    />
   </div>
 </div>

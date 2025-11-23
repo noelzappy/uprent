@@ -80,6 +80,84 @@ declare const app: import("elysia").default<"", false, {
 				};
 			};
 		};
+		preferences: {
+			get: {
+				body: unknown;
+				params: Record<never, string>;
+				query: {
+					userSessionId: string;
+				};
+				headers: unknown;
+				response: {
+					200: {
+						status: "success";
+						payload: {
+							preferences: {
+								addresses: {
+									id: string;
+									label: string;
+								}[];
+								maxDurations: {
+									walking: number | null;
+									driving: number | null;
+									transit: number | null;
+									biking: number | null;
+								};
+							};
+						};
+					};
+				} | {
+					200: {
+						status: "error";
+						message: string;
+					};
+				};
+			};
+			post: {
+				body: {
+					userSessionId: string;
+					preferences: {
+						addresses: {
+							id: string;
+							label: string;
+						}[];
+						maxDurations: {
+							walking: number | null;
+							driving: number | null;
+							transit: number | null;
+							biking: number | null;
+						};
+					};
+				};
+				params: Record<never, string>;
+				query: unknown;
+				headers: unknown;
+				response: {
+					200: {
+						status: "success";
+						payload: {
+							preferences: {
+								addresses: {
+									id: string;
+									label: string;
+								}[];
+								maxDurations: {
+									walking: number | null;
+									driving: number | null;
+									transit: number | null;
+									biking: number | null;
+								};
+							};
+						};
+					};
+				} | {
+					200: {
+						status: "error";
+						message: string;
+					};
+				};
+			};
+		};
 	};
 }, {
 	derive: {};
