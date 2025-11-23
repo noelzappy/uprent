@@ -38,11 +38,14 @@
   ) => {
     loading = true
     showSettingsModal = false
-    addresses = newAddresses
-    maxDurations = newMaxDurations
-    await extensionCommuteStorage.save(newAddresses, newMaxDurations)
-    if (addresses.length > 0) {
-      await load()
+    const response = await extensionCommuteStorage.save(
+      newAddresses,
+      newMaxDurations,
+    )
+    if (response) {
+      durations = response.durations || null
+      maxDurations = response.preferences.maxDurations || DefaultMaxDurations
+      addresses = response.preferences.addresses || []
     }
     loading = false
   }

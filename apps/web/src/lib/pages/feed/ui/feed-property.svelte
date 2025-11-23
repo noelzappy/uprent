@@ -35,9 +35,12 @@
   ) => {
     loadingCommutes = true
     showCommuteSettings = false
-    await preferences.save(newAddresses, newMaxDurations)
-    if (newAddresses.length > 0) {
-      await loadCommutes()
+    const result = await preferences.save(newAddresses, newMaxDurations)
+    if (result) {
+      const { durations: durs, preferences: prefs } = result
+      durations = durs || null
+      maxDurations = prefs.maxDurations || DefaultMaxDurations
+      addresses = prefs.addresses || []
     }
     loadingCommutes = false
   }

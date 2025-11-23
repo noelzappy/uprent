@@ -101,28 +101,32 @@ function createPreferencesStore() {
       fetchPreferences()
     },
     save: async (addresses: Address[], maxDurations: MaxDurations) => {
+      update(s => ({ ...s, isLoading: true }))
       try {
         const userSessionId = getSessionId()
-        const { data } = await api.commute.preferences.post({
+        const { data } = await api.commute.durations.post({
           userSessionId,
           preferences: {
             addresses,
             maxDurations,
           },
         })
-        if (data && 'status' in data && data.status === 'success') {
+        if (data && data.status === 'success') {
           set({
             addresses: data.payload.preferences.addresses,
             maxDurations: data.payload.preferences.maxDurations,
             isLoading: false,
           })
+          return data.payload
         } else {
           console.error('Failed to save preferences', data)
+          return null
         }
       } catch (error) {
         console.error('Failed to save preferences', error)
+        return null
       } finally {
-        fetchPreferences()
+        update(s => ({ ...s, isLoading: false }))
       }
     },
   }

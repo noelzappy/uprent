@@ -39,7 +39,10 @@ export const extensionCommuteStorage = {
     })
   },
 
-  async save(addresses: Address[], maxDurations: MaxDurations): Promise<void> {
+  async save(
+    addresses: Address[],
+    maxDurations: MaxDurations,
+  ): Promise<DurationsResponse | null> {
     const userSessionId = await this.getSessionId()
 
     return new Promise(resolve => {
@@ -48,8 +51,11 @@ export const extensionCommuteStorage = {
           action: 'syncToServer',
           payload: { addresses, maxDurations, userSessionId },
         },
-        () => {
-          resolve()
+        (response: WorkerResponse<DurationsResponse>) => {
+          if (!response.success || !response.data) {
+            return resolve(null)
+          }
+          resolve(response.data)
         },
       )
     })
