@@ -13,9 +13,9 @@
   let showSettingsModal = false
 
   onMount(async () => {
-    const cacheData = await extensionCommuteStorage.getPrefs()
-    addresses = cacheData.addresses
-    maxDurations = cacheData.maxDurations
+    const prefs = await extensionCommuteStorage.getPrefs()
+    addresses = prefs.addresses
+    maxDurations = prefs.maxDurations
   })
 
   const load = async () => {
@@ -25,8 +25,11 @@
     }
     loading = true
     const response = await extensionCommuteStorage.fetchCommutes()
-    durations = response.data || null
+    durations = response.data?.durations || null
     loading = false
+    maxDurations =
+      response.data?.preferences.maxDurations || DefaultMaxDurations
+    addresses = response.data?.preferences.addresses || []
   }
 
   const handleSaveSettings = async (
@@ -34,10 +37,10 @@
     newMaxDurations: MaxDurations,
   ) => {
     loading = true
+    showSettingsModal = false
     addresses = newAddresses
     maxDurations = newMaxDurations
     await extensionCommuteStorage.save(newAddresses, newMaxDurations)
-    showSettingsModal = false
     if (addresses.length > 0) {
       await load()
     }

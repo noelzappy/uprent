@@ -1,3 +1,5 @@
+import type { UserPreferences } from '~core/types'
+
 export type TravelMode = 'walking' | 'driving' | 'transit' | 'biking'
 
 export type DurationsByMode = {
@@ -11,4 +13,9 @@ export type DurationsByMode = {
 
 export type Durations = {
   [addressId: string]: DurationsByMode
+}
+
+export type DurationsResponse = {
+  durations: Durations
+  preferences: UserPreferences
 }

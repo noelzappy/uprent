@@ -3,7 +3,7 @@ import {
   DefaultMaxDurations,
   STORAGE_KEYS,
 } from '~core/constants/commute-constants'
-import type { Durations } from '~core/database'
+import type { DurationsResponse } from '~core/database/data-types/durations'
 
 export const extensionCommuteStorage = {
   async getSessionId(): Promise<string> {
@@ -55,19 +55,21 @@ export const extensionCommuteStorage = {
     })
   },
 
-  async fetchCommutes(): Promise<WorkerResponse<Durations>> {
+  async fetchCommutes(): Promise<WorkerResponse<DurationsResponse>> {
     const userSessionId = await this.getSessionId()
-    return new Promise<WorkerResponse<Durations>>((resolve, _reject) => {
-      chrome.runtime.sendMessage(
-        {
-          action: 'fetchCommutes',
-          payload: { userSessionId },
-        },
-        (response: WorkerResponse<Durations>) => {
-          resolve(response)
-        },
-      )
-    })
+    return new Promise<WorkerResponse<DurationsResponse>>(
+      (resolve, _reject) => {
+        chrome.runtime.sendMessage(
+          {
+            action: 'fetchCommutes',
+            payload: { userSessionId },
+          },
+          (response: WorkerResponse<DurationsResponse>) => {
+            resolve(response)
+          },
+        )
+      },
+    )
   },
 
   async getPrefs(): Promise<{

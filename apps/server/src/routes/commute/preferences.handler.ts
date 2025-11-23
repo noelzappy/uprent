@@ -1,6 +1,6 @@
 import { app, res } from '@/handler'
 import { PreferencesSchema, t } from '@schemas'
-import type { UserPreferences } from '~core/types'
+import type { DBUserPreferences } from '~core/types'
 import { DefaultMaxDurations } from '~core/constants/commute-constants'
 
 const reqDTO = t.Object({
@@ -26,7 +26,7 @@ export const preferencesEndpointHandler = app
         .query(
           `SELECT * FROM user_preferences WHERE userSessionId = $userSessionId`,
         )
-        .get({ $userSessionId: userSessionId }) as UserPreferences | undefined
+        .get({ $userSessionId: userSessionId }) as DBUserPreferences | undefined
 
       if (!result) {
         return res.ok({
@@ -39,7 +39,7 @@ export const preferencesEndpointHandler = app
 
       return res.ok({
         preferences: {
-          addresses: JSON.parse(result.favoriteAddresses || '[]'),
+          addresses: JSON.parse(result.addresses || '[]'),
           maxDurations: {
             walking: result.walking,
             biking: result.biking,
@@ -69,7 +69,7 @@ export const preferencesEndpointHandler = app
       if (existing) {
         db.query(
           `UPDATE user_preferences 
-           SET favoriteAddresses = $favoriteAddresses,
+           SET addresses = $addresses,
                walking = $walking,
                biking = $biking,
                driving = $driving,
@@ -78,7 +78,7 @@ export const preferencesEndpointHandler = app
            WHERE userSessionId = $userSessionId`,
         ).run({
           $userSessionId: userSessionId,
-          $favoriteAddresses: JSON.stringify(addresses),
+          $addresses: JSON.stringify(addresses),
           $walking: maxDurations.walking,
           $biking: maxDurations.biking,
           $driving: maxDurations.driving,
@@ -86,11 +86,11 @@ export const preferencesEndpointHandler = app
         })
       } else {
         db.query(
-          `INSERT INTO user_preferences (userSessionId, favoriteAddresses, walking, biking, driving, transit)
-           VALUES ($userSessionId, $favoriteAddresses, $walking, $biking, $driving, $transit)`,
+          `INSERT INTO user_preferences (userSessionId, addresses, walking, biking, driving, transit)
+           VALUES ($userSessionId, $addresses, $walking, $biking, $driving, $transit)`,
         ).run({
           $userSessionId: userSessionId,
-          $favoriteAddresses: JSON.stringify(addresses),
+          $addresses: JSON.stringify(addresses),
           $walking: maxDurations.walking,
           $biking: maxDurations.biking,
           $driving: maxDurations.driving,

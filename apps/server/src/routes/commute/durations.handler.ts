@@ -1,12 +1,13 @@
 import { app, res } from '@/handler'
-import { t, DurationsSchema } from '@schemas'
+import { t, DurationsSchema, PreferencesSchema } from '@schemas'
 import { DefaultMaxDurations } from '~core/constants/commute-constants'
 import type { Durations, DurationsByMode } from '~core/database'
 import { randomInt } from '~core/helpers'
-import { Address, UserPreferences } from '~core/types'
+import { Address, DBUserPreferences, UserPreferences } from '~core/types'
 
 const resDTO = t.Object({
   durations: DurationsSchema,
+  preferences: PreferencesSchema,
 })
 
 const queryDTO = t.Object({
@@ -25,16 +26,16 @@ export const commuteDurationsEndpointHandler = app.get(
       .query(
         `SELECT * FROM user_preferences WHERE userSessionId = $userSessionId`,
       )
-      .get({ $userSessionId: userSessionId }) as UserPreferences | null
+      .get({ $userSessionId: userSessionId }) as DBUserPreferences | null
 
     if (!result) {
       result = {
-        favoriteAddresses: '[]',
+        addresses: '[]',
         ...DefaultMaxDurations,
       }
     }
-    const preferences = {
-      addresses: JSON.parse(result.favoriteAddresses) || [],
+    const preferences: UserPreferences = {
+      addresses: JSON.parse(result.addresses || '[]'),
       maxDurations: {
         walking: result.walking,
         biking: result.biking,
@@ -60,6 +61,7 @@ export const commuteDurationsEndpointHandler = app.get(
 
     return res.ok({
       durations,
+      preferences,
     })
   },
   {

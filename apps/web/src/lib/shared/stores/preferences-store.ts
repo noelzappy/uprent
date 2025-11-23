@@ -79,7 +79,7 @@ function createPreferencesStore() {
 
     if (data && data.status === 'success') {
       return {
-        data: data.payload.durations,
+        data: data.payload,
         error: null,
       }
     }

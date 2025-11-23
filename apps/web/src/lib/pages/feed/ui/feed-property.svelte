@@ -4,13 +4,13 @@
   import { CommuteTime } from '~ui/components/widgets'
   import type { Address, MaxDurations } from '~core/types'
   import { preferences } from '$lib/shared/stores'
+  import { DefaultMaxDurations } from '~core/constants/commute-constants'
   export let property: Property
   let loadingCommutes: boolean = false
   let showCommuteSettings: boolean = false
   let durations: Durations | null = null
-
-  const addresses = $preferences.addresses
-  const maxDurations = $preferences.maxDurations
+  let maxDurations = $preferences.maxDurations
+  let addresses = $preferences.addresses
 
   const loadCommutes = async () => {
     if (addresses.length === 0) {
@@ -20,11 +20,13 @@
     loadingCommutes = true
     const { data, error } = await preferences.getCommuteData()
     loadingCommutes = false
-    console.log('Commute data loaded:', { data, error })
     if (error || !data) {
       return
     }
-    durations = data || null
+    const { durations: durs, preferences: prefs } = data
+    durations = durs || null
+    maxDurations = prefs.maxDurations || DefaultMaxDurations
+    addresses = prefs.addresses || []
   }
 
   const handleSaveSettings = async (

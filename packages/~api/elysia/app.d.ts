@@ -55,18 +55,6 @@ declare const app: import("elysia").default<"", false, {
 				body: unknown;
 				params: Record<never, string>;
 				query: {
-					preferences?: {
-						addresses: {
-							id: string;
-							label: string;
-						}[];
-						maxDurations: {
-							walking: number | null;
-							driving: number | null;
-							transit: number | null;
-							biking: number | null;
-						};
-					} | undefined;
 					userSessionId: string;
 				};
 				headers: unknown;
@@ -82,6 +70,18 @@ declare const app: import("elysia").default<"", false, {
 									transit: number | null;
 									biking: number | null;
 									addressLabel: string;
+								};
+							};
+							preferences: {
+								addresses: {
+									id: string;
+									label: string;
+								}[];
+								maxDurations: {
+									walking: number | null;
+									driving: number | null;
+									transit: number | null;
+									biking: number | null;
 								};
 							};
 						};
@@ -133,7 +133,6 @@ declare const app: import("elysia").default<"", false, {
 		preferences: {
 			post: {
 				body: {
-					userSessionId: string;
 					preferences: {
 						addresses: {
 							id: string;
@@ -146,6 +145,7 @@ declare const app: import("elysia").default<"", false, {
 							biking: number | null;
 						};
 					};
+					userSessionId: string;
 				};
 				params: Record<never, string>;
 				query: unknown;

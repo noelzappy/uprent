@@ -5,7 +5,7 @@ export const initDatabase = (db: Database) => {
     CREATE TABLE IF NOT EXISTS user_preferences (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userSessionId TEXT UNIQUE,
-        favoriteAddresses TEXT,
+        addresses TEXT,
         walking INTEGER,
         biking INTEGER,
         driving INTEGER,

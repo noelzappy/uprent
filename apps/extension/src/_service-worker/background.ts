@@ -1,13 +1,13 @@
 import api from '~api'
-import type { Durations } from '~core/database'
 import type { WorkerResponse, Address, MaxDurations } from '~core/types'
 import { STORAGE_KEYS } from '~core/constants/commute-constants'
+import type { DurationsResponse } from '~core/database/data-types/durations'
 
 chrome.runtime.onMessage.addListener(
   (
     request,
     _sender,
-    sendResponse: (response: WorkerResponse<Durations>) => void,
+    sendResponse: (response: WorkerResponse<DurationsResponse>) => void,
   ) => {
     switch (request.action) {
       case 'fetchCommutes': {
@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(
         api.commute.durations
           .get({ $query: { userSessionId } })
           .then(({ data }) => {
-            if (data?.status === 'error' || !data?.payload?.durations) {
+            if (data?.status === 'error' || !data?.payload) {
               sendResponse({
                 success: false,
                 error: 'Error fetching commute durations',
@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener(
 
             sendResponse({
               success: true,
-              data: data?.payload.durations,
+              data: data.payload,
             })
           })
           .catch(error => {
