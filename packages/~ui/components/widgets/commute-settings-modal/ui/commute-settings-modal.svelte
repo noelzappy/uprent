@@ -83,6 +83,10 @@
   } else if (!open && previousOpen !== false) {
     previousOpen = false
   }
+
+  const inputStyle =
+    'focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2'
+  const inputLabelStyle = '.mb-1 .block .text-xs .font-medium .text-gray-700'
 </script>
 
 <Modal {open} title="Commute Settings" onClose={handleClose}>
@@ -120,7 +124,7 @@
                     setTimeout(() => (showSuggestions[index] = false), 200)
                   }}
                   placeholder="Enter address..."
-                  class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .py-2 .pl-10 .pr-3 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
+                  class={inputStyle}
                 />
 
                 {#if showSuggestions[index] && filteredSuggestions[index]?.length > 0}
@@ -177,54 +181,46 @@
 
       <div class=".grid .grid-cols-2 .gap-3">
         <div>
-          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
-            >Walking</label
-          >
+          <label class={inputLabelStyle}>Walking</label>
           <input
             type="number"
             bind:value={maxDurations.walking}
             placeholder="e.g. 30"
             min="0"
-            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
+            class={inputStyle}
           />
         </div>
 
         <div>
-          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
-            >Biking</label
-          >
+          <label class={inputLabelStyle}>Biking</label>
           <input
             type="number"
             bind:value={maxDurations.biking}
             placeholder="e.g. 20"
             min="0"
-            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
+            class={inputStyle}
           />
         </div>
 
         <div>
-          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
-            >Driving</label
-          >
+          <label class={inputLabelStyle}>Driving</label>
           <input
             type="number"
             bind:value={maxDurations.driving}
             placeholder="e.g. 15"
             min="0"
-            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
+            class={inputStyle}
           />
         </div>
 
         <div>
-          <label class=".mb-1 .block .text-xs .font-medium .text-gray-700"
-            >Transit</label
-          >
+          <label class={inputLabelStyle}>Transit</label>
           <input
             type="number"
             bind:value={maxDurations.transit}
             placeholder="e.g. 25"
             min="0"
-            class="focus:.ring-primary-500 .w-full .rounded-md .border .border-gray-300 .px-3 .py-2 .text-sm focus:.border-transparent focus:.outline-none focus:.ring-2"
+            class={inputStyle}
           />
         </div>
       </div>
