@@ -75,14 +75,16 @@
   />
 
   {#if !durations}
-    <div class=".flex .gap-2">
-      <Button primary {loading} onClick={load} class=".max-w-60 .flex-1">
-        <RouteSVG slot="icon" />
-        Load commutes
-      </Button>
-      <Button subtle onClick={toggleSettings}>
-        <SettingsSVG />
-      </Button>
+    <div class=".flex .flex-col .p-4 .text-center">
+      <div class=".flex .gap-2">
+        <Button primary {loading} onClick={load} class=".text-xs">
+          <RouteSVG slot="icon" />
+          Load commute
+        </Button>
+        <Button subtle onClick={toggleSettings} class=".text-xs">
+          <SettingsSVG />
+        </Button>
+      </div>
     </div>
   {:else}
     <div class=".flex .h-full .flex-col">
@@ -101,18 +103,22 @@
         <div
           class={isExtension
             ? '.flex-1 .space-y-3 .overflow-y-auto .pr-1'
-            : '.flex .flex-1 .gap-3 .overflow-y-auto .pr-1'}
+            : '.flex .flex-1 .gap-3 .overflow-x-auto .pb-2'}
         >
           {#each Object.entries(durations) as [addressId, addressDurations]}
             {@const address = addresses.find(a => a.id === addressId)}
-            <div class={isExtension ? '.space-y-2' : '.flex-1 .space-y-2'}>
+            <div
+              class={isExtension
+                ? '.rounded-lg .border .border-gray-100 .bg-white .p-3 .shadow-sm'
+                : '.min-w-[200px] .flex-1 .rounded-lg .border .border-gray-100 .bg-white .p-3 .shadow-sm'}
+            >
               <div
-                class=".text-xs .font-medium .text-gray-700"
+                class=".mb-2 .line-clamp-1 .text-xs .font-semibold .text-gray-800"
                 title={address?.label}
               >
                 {address?.label || 'Unknown address'}
               </div>
-              <div class=".grid .grid-cols-2 .gap-2">
+              <div class=".flex .flex-wrap .gap-2">
                 {#each travelModes as mode}
                   {@const duration = addressDurations[mode]}
                   {@const exceeded =
@@ -120,22 +126,28 @@
                   {#if duration !== null}
                     <div
                       class={exceeded
-                        ? '.flex .items-center .gap-2 .rounded-lg .border .border-red-300 .bg-red-50 .p-2 .transition-colors'
-                        : '.flex .items-center .gap-2 .rounded-lg .border .border-gray-200 .bg-gray-50 .p-2 .transition-colors'}
+                        ? '.flex .items-center .gap-1.5 .rounded .border .border-red-200 .bg-red-50 .px-2 .py-1 .text-red-700'
+                        : '.flex .items-center .gap-1.5 .rounded .border .border-gray-200 .bg-gray-50 .px-2 .py-1 .text-gray-600'}
+                      title="{getTravelModeLabel(mode)}: {duration} min"
                     >
-                      <svelte:component this={getTravelModeIcon(mode)} />
-                      <div class=".min-w-0 .flex-1">
-                        <div class=".text-xs .text-gray-500">
-                          {getTravelModeLabel(mode)}
-                        </div>
-                        <div
-                          class={exceeded
-                            ? '.text-sm .font-medium .text-red-700'
-                            : '.text-sm .font-medium .text-gray-900'}
-                        >
-                          {duration} min
-                        </div>
+                      <div
+                        class=".flex .h-4 .w-4 .items-center .justify-center"
+                      >
+                        <svelte:component this={getTravelModeIcon(mode)} />
                       </div>
+                      <span class=".whitespace-nowrap .text-xs .font-medium">
+                        {duration}m
+                      </span>
+                      {#if exceeded}
+                        <div
+                          class=".ml-1 .flex .h-3 .w-3 .items-center .justify-center .rounded-full .bg-red-500 .text-[10px] .font-bold .text-white"
+                          title="Exceeded maximum preferred duration of {maxDurations[
+                            mode
+                          ]} min"
+                        >
+                          !
+                        </div>
+                      {/if}
                     </div>
                   {/if}
                 {/each}
