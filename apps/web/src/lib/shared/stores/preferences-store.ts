@@ -30,10 +30,6 @@ function createPreferencesStore() {
   if (typeof window !== 'undefined') {
     window.addEventListener('message', event => {
       if (event.data.type === HAND_SHAKE_KEY && event.data.userSessionId) {
-        console.log(
-          'Received session ID from extension:',
-          event.data.userSessionId,
-        )
         localStorage.setItem('userSessionId', event.data.userSessionId)
         preferences.fetch()
       }
@@ -49,45 +45,84 @@ function createPreferencesStore() {
       })
 
       if (data && 'status' in data && data.status === 'success') {
-        set({
+        const resp = {
           addresses: data.payload.preferences.addresses,
           maxDurations: data.payload.preferences.maxDurations,
+        }
+
+        set({
+          ...resp,
           isLoading: false,
         })
+
+        return {
+          data: resp,
+          error: null,
+        }
       }
     } catch (error) {
       console.error('Failed to fetch preferences', error)
+      return { data: null, error }
     } finally {
       update(s => ({ ...s, isLoading: false }))
     }
   }
 
+  const getCommuteData = async () => {
+    const userSessionId = getSessionId()
+
+    const { data } = await api.commute.durations.get({
+      $query: {
+        userSessionId,
+      },
+    })
+
+    if (data && data.status === 'success') {
+      return {
+        data: data.payload.durations,
+        error: null,
+      }
+    }
+
+    return {
+      data: null,
+      error: new Error('Failed to fetch commute durations'),
+    }
+  }
+
   return {
     fetch: fetchPreferences,
+    getCommuteData,
     subscribe,
-    init: async () => {
-      const userSessionId = getSessionId()
-      await fetchPreferences()
+    init: () => {
       if (typeof window !== 'undefined') {
-        window.postMessage(
-          { type: WEB_APP_READY_EVENT_NAME, userSessionId },
-          '*',
-        )
+        window.postMessage({ type: WEB_APP_READY_EVENT_NAME }, '*')
       }
+      fetchPreferences()
     },
     save: async (addresses: Address[], maxDurations: MaxDurations) => {
-      update(s => ({ ...s, addresses, maxDurations }))
       try {
         const userSessionId = getSessionId()
-        await api.commute.preferences.post({
+        const { data } = await api.commute.preferences.post({
           userSessionId,
           preferences: {
             addresses,
             maxDurations,
           },
         })
+        if (data && 'status' in data && data.status === 'success') {
+          set({
+            addresses: data.payload.preferences.addresses,
+            maxDurations: data.payload.preferences.maxDurations,
+            isLoading: false,
+          })
+        } else {
+          console.error('Failed to save preferences', data)
+        }
       } catch (error) {
         console.error('Failed to save preferences', error)
+      } finally {
+        fetchPreferences()
       }
     },
   }

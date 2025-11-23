@@ -22,8 +22,6 @@ export const preferencesEndpointHandler = app
     ({ query, db, res }) => {
       const { userSessionId } = query
 
-      console.log(userSessionId)
-
       const result = db
         .query(
           `SELECT * FROM user_preferences WHERE userSessionId = $userSessionId`,

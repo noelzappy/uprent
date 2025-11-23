@@ -55,7 +55,19 @@ declare const app: import("elysia").default<"", false, {
 				body: unknown;
 				params: Record<never, string>;
 				query: {
-					addressIds?: string | undefined;
+					preferences?: {
+						addresses: {
+							id: string;
+							label: string;
+						}[];
+						maxDurations: {
+							walking: number | null;
+							driving: number | null;
+							transit: number | null;
+							biking: number | null;
+						};
+					} | undefined;
+					userSessionId: string;
 				};
 				headers: unknown;
 				response: {
@@ -64,10 +76,12 @@ declare const app: import("elysia").default<"", false, {
 						payload: {
 							durations: {
 								[x: string]: {
+									id: string;
 									walking: number | null;
 									driving: number | null;
 									transit: number | null;
 									biking: number | null;
+									addressLabel: string;
 								};
 							};
 						};
@@ -80,6 +94,7 @@ declare const app: import("elysia").default<"", false, {
 				};
 			};
 		};
+	} & {
 		preferences: {
 			get: {
 				body: unknown;
@@ -113,6 +128,9 @@ declare const app: import("elysia").default<"", false, {
 					};
 				};
 			};
+		};
+	} & {
+		preferences: {
 			post: {
 				body: {
 					userSessionId: string;

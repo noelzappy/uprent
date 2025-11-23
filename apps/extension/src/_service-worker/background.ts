@@ -1,6 +1,6 @@
 import api from '~api'
 import type { Durations } from '~core/database'
-import type { WorkerResponse, Address } from '~core/types'
+import type { WorkerResponse, Address, MaxDurations } from '~core/types'
 import { STORAGE_KEYS } from '~core/constants/commute-constants'
 
 chrome.runtime.onMessage.addListener(
@@ -9,28 +9,23 @@ chrome.runtime.onMessage.addListener(
     _sender,
     sendResponse: (response: WorkerResponse<Durations>) => void,
   ) => {
-    if (request.action === 'fetchCommutes') {
-      chrome.storage.local.get([STORAGE_KEYS.ADDRESSES], result => {
-        const addresses: Address[] = result[STORAGE_KEYS.ADDRESSES] || []
+    switch (request.action) {
+      case 'fetchCommutes': {
+        const userSessionId: string =
+          request?.payload?.userSessionId || crypto.randomUUID()
 
-        if (addresses.length === 0) {
+        if (!userSessionId) {
           sendResponse({
             success: false,
-            error: 'No addresses configured',
+            error: 'User session ID is required',
           })
           return
         }
 
-        const addressIds = addresses.map(a => a.id).join(',')
-
         api.commute.durations
-          .get({
-            $query: {
-              addressIds,
-            },
-          })
+          .get({ $query: { userSessionId } })
           .then(({ data }) => {
-            if (data?.status === 'error') {
+            if (data?.status === 'error' || !data?.payload?.durations) {
               sendResponse({
                 success: false,
                 error: 'Error fetching commute durations',
@@ -49,9 +44,108 @@ chrome.runtime.onMessage.addListener(
               error: error.message || 'Unknown error',
             })
           })
-      })
 
-      return true
+        return true
+      }
+
+      case 'syncFromServer': {
+        const userSessionId: string =
+          request?.payload?.userSessionId || crypto.randomUUID()
+
+        api.commute.preferences
+          .get({
+            $query: { userSessionId },
+          })
+          .then(({ data }) => {
+            if (data && data.status === 'success') {
+              const { addresses, maxDurations } = data.payload.preferences
+              chrome.storage.local.set(
+                {
+                  [STORAGE_KEYS.USER_SESSION_ID]: userSessionId,
+                  [STORAGE_KEYS.ADDRESSES]: addresses,
+                  [STORAGE_KEYS.MAX_DURATIONS]: maxDurations,
+                },
+                () => {
+                  sendResponse({
+                    success: true,
+                  })
+                },
+              )
+            } else {
+              sendResponse({
+                success: false,
+                error: 'Error syncing preferences from server',
+              })
+            }
+          })
+          .catch(error => {
+            sendResponse({
+              success: false,
+              error: error.message || 'Unknown error',
+            })
+          })
+
+        return true
+      }
+
+      case 'syncToServer': {
+        const { addresses, maxDurations, userSessionId } =
+          (request.payload as {
+            addresses: Address[]
+            maxDurations: MaxDurations
+            userSessionId?: string
+          }) || {}
+        if (!addresses || !maxDurations) {
+          sendResponse({
+            success: false,
+            error: 'Invalid payload for syncToServer',
+          })
+          return
+        }
+
+        const _userSessionId: string = userSessionId || crypto.randomUUID()
+
+        api.commute.preferences
+          .post({
+            userSessionId: _userSessionId,
+            preferences: {
+              addresses,
+              maxDurations,
+            },
+          })
+          .then(resp => {
+            const { data } = resp
+            if (data && data.status === 'error') {
+              sendResponse({
+                success: false,
+                error: 'Error syncing preferences to server',
+              })
+              return
+            }
+
+            chrome.storage.local.set(
+              {
+                [STORAGE_KEYS.USER_SESSION_ID]: _userSessionId,
+                [STORAGE_KEYS.ADDRESSES]: data?.payload.preferences.addresses,
+                [STORAGE_KEYS.MAX_DURATIONS]:
+                  data?.payload.preferences.maxDurations,
+              },
+              () => {
+                sendResponse({
+                  success: true,
+                })
+              },
+            )
+          })
+          .catch(error => {
+            sendResponse({
+              success: false,
+              error: error.message || 'Unknown error',
+            })
+          })
+
+        return true
+      }
     }
   },
 )

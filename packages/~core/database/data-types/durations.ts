@@ -5,6 +5,8 @@ export type DurationsByMode = {
   driving: number | null
   transit: number | null
   biking: number | null
+  addressLabel: string
+  id: string
 }
 
 export type Durations = {

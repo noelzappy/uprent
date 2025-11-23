@@ -3,6 +3,7 @@ import type { MaxDurations } from '~core/types'
 export const STORAGE_KEYS = {
   ADDRESSES: 'uprent_commute_addresses',
   MAX_DURATIONS: 'uprent_commute_max_durations',
+  USER_SESSION_ID: 'uprent_user_session_id',
 } as const
 
 export const DefaultMaxDurations: MaxDurations = {

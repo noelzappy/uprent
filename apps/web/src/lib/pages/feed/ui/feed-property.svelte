@@ -4,14 +4,13 @@
   import { CommuteTime } from '~ui/components/widgets'
   import type { Address, MaxDurations } from '~core/types'
   import { preferences } from '$lib/shared/stores'
-  import api from '~api'
   export let property: Property
   let loadingCommutes: boolean = false
   let showCommuteSettings: boolean = false
+  let durations: Durations | null = null
 
   const addresses = $preferences.addresses
   const maxDurations = $preferences.maxDurations
-  let durations: Durations | null = null
 
   const loadCommutes = async () => {
     if (addresses.length === 0) {
@@ -19,28 +18,26 @@
       return
     }
     loadingCommutes = true
-    const { data, error } = await api.commute.durations.get({
-      $query: {
-        addressIds: addresses.map(a => a.id).join(','),
-      },
-    })
+    const { data, error } = await preferences.getCommuteData()
     loadingCommutes = false
-    if (error || data.status === 'error') return
-    durations = data.payload.durations
+    console.log('Commute data loaded:', { data, error })
+    if (error || !data) {
+      return
+    }
+    durations = data || null
   }
 
   const handleSaveSettings = async (
     newAddresses: Address[],
     newMaxDurations: MaxDurations,
   ) => {
-    showCommuteSettings = false
     loadingCommutes = true
+    showCommuteSettings = false
     await preferences.save(newAddresses, newMaxDurations)
-    if (newAddresses.length === 0) {
-      loadingCommutes = false
-      return
+    if (newAddresses.length > 0) {
+      await loadCommutes()
     }
-    await loadCommutes()
+    loadingCommutes = false
   }
 </script>
 

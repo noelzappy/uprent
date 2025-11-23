@@ -1,22 +1,24 @@
-import type { Address, MaxDurations } from '~core/types'
+import type { Address, MaxDurations, WorkerResponse } from '~core/types'
 import {
   DefaultMaxDurations,
   STORAGE_KEYS,
 } from '~core/constants/commute-constants'
-
-import api from '~api'
+import type { Durations } from '~core/database'
 
 export const extensionCommuteStorage = {
   async getSessionId(): Promise<string> {
     return await new Promise(resolve => {
-      chrome.storage.local.get(['userSessionId'], result => {
-        if (result.userSessionId) {
-          resolve(result.userSessionId)
+      chrome.storage.local.get([STORAGE_KEYS.USER_SESSION_ID], result => {
+        if (result[STORAGE_KEYS.USER_SESSION_ID]) {
+          resolve(result[STORAGE_KEYS.USER_SESSION_ID])
         } else {
           const newId = crypto.randomUUID()
-          chrome.storage.local.set({ userSessionId: newId }, () => {
-            resolve(newId)
-          })
+          chrome.storage.local.set(
+            { [STORAGE_KEYS.USER_SESSION_ID]: newId },
+            () => {
+              resolve(newId)
+            },
+          )
         }
       })
     })
@@ -24,43 +26,55 @@ export const extensionCommuteStorage = {
 
   async syncFromServer(): Promise<void> {
     const userSessionId = await this.getSessionId()
-    const { data } = await api.commute.preferences.get({
-      $query: { userSessionId },
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'syncFromServer',
+          payload: { userSessionId },
+        },
+        () => {
+          resolve()
+        },
+      )
     })
-
-    if (data && 'status' in data && data.status === 'success') {
-      const { addresses, maxDurations } = data.payload.preferences
-      await new Promise<void>(resolve => {
-        chrome.storage.local.set(
-          {
-            [STORAGE_KEYS.ADDRESSES]: addresses,
-            [STORAGE_KEYS.MAX_DURATIONS]: maxDurations,
-          },
-          () => resolve(),
-        )
-      })
-    }
   },
 
-  async syncToServer(
-    addresses: Address[],
-    maxDurations: MaxDurations,
-  ): Promise<void> {
+  async save(addresses: Address[], maxDurations: MaxDurations): Promise<void> {
     const userSessionId = await this.getSessionId()
-    await api.commute.preferences.post({
-      userSessionId,
-      preferences: {
-        addresses,
-        maxDurations,
-      },
+
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'syncToServer',
+          payload: { addresses, maxDurations, userSessionId },
+        },
+        () => {
+          resolve()
+        },
+      )
     })
   },
 
-  async getData(): Promise<{
+  async fetchCommutes(): Promise<WorkerResponse<Durations>> {
+    const userSessionId = await this.getSessionId()
+    return new Promise<WorkerResponse<Durations>>((resolve, _reject) => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'fetchCommutes',
+          payload: { userSessionId },
+        },
+        (response: WorkerResponse<Durations>) => {
+          resolve(response)
+        },
+      )
+    })
+  },
+
+  async getPrefs(): Promise<{
     addresses: Address[]
     maxDurations: MaxDurations
   }> {
-    return await new Promise(resolve => {
+    const data = await new Promise(resolve => {
       this.syncFromServer().then(() => {
         chrome.storage.local.get(
           [STORAGE_KEYS.ADDRESSES, STORAGE_KEYS.MAX_DURATIONS],
@@ -74,6 +88,10 @@ export const extensionCommuteStorage = {
         )
       })
     })
+    return data as {
+      addresses: Address[]
+      maxDurations: MaxDurations
+    }
   },
 
   clear(): void {

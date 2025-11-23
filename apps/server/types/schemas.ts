@@ -15,6 +15,8 @@ export const DurationsByModeSchema = t.Object({
   driving: t.Union([t.Number(), t.Null()]),
   transit: t.Union([t.Number(), t.Null()]),
   biking: t.Union([t.Number(), t.Null()]),
+  addressLabel: t.String(),
+  id: t.String(),
 })
 
 export const DurationsSchema = t.Record(t.String(), DurationsByModeSchema)
