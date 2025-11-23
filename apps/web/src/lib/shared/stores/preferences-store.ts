@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store'
+import { writable } from 'svelte/store'
 import type { Address, MaxDurations } from '~core/types'
 import {
   DefaultMaxDurations,
@@ -12,12 +12,10 @@ function createPreferencesStore() {
     addresses: Address[]
     maxDurations: MaxDurations
     isLoading: boolean
-    lastInitAt?: number
   }>({
     addresses: [],
     maxDurations: DefaultMaxDurations,
     isLoading: false,
-    lastInitAt: undefined,
   })
 
   const getSessionId = () => {
@@ -37,46 +35,44 @@ function createPreferencesStore() {
           event.data.userSessionId,
         )
         localStorage.setItem('userSessionId', event.data.userSessionId)
-
-        preferences.init()
+        preferences.fetch()
       }
     })
   }
 
-  return {
-    subscribe,
-    get: () => get({ subscribe }),
-    init: async () => {
-      const { lastInitAt } = get({ subscribe })
+  const fetchPreferences = async () => {
+    update(s => ({ ...s, isLoading: true }))
+    try {
+      const userSessionId = getSessionId()
+      const { data } = await api.commute.preferences.get({
+        $query: { userSessionId },
+      })
 
-      // Only proceed if not initialized in the last hour
-      const ONE_HOUR_MS = 60 * 60 * 1000
-      if (lastInitAt && Date.now() - lastInitAt < ONE_HOUR_MS) {
-        return
-      }
-
-      // if (typeof window !== 'undefined') {
-      //   window.postMessage({ type: WEB_APP_READY_EVENT_NAME }, '*')
-      // }
-
-      update(s => ({ ...s, isLoading: true }))
-      try {
-        const userSessionId = getSessionId()
-        const { data } = await api.commute.preferences.get({
-          $query: { userSessionId },
+      if (data && 'status' in data && data.status === 'success') {
+        set({
+          addresses: data.payload.preferences.addresses,
+          maxDurations: data.payload.preferences.maxDurations,
+          isLoading: false,
         })
+      }
+    } catch (error) {
+      console.error('Failed to fetch preferences', error)
+    } finally {
+      update(s => ({ ...s, isLoading: false }))
+    }
+  }
 
-        if (data && 'status' in data && data.status === 'success') {
-          set({
-            addresses: data.payload.preferences.addresses,
-            maxDurations: data.payload.preferences.maxDurations,
-            isLoading: false,
-          })
-        }
-      } catch (error) {
-        console.error('Failed to fetch preferences', error)
-      } finally {
-        update(s => ({ ...s, isLoading: false, lastInitAt: Date.now() }))
+  return {
+    fetch: fetchPreferences,
+    subscribe,
+    init: async () => {
+      const userSessionId = getSessionId()
+      await fetchPreferences()
+      if (typeof window !== 'undefined') {
+        window.postMessage(
+          { type: WEB_APP_READY_EVENT_NAME, userSessionId },
+          '*',
+        )
       }
     },
     save: async (addresses: Address[], maxDurations: MaxDurations) => {
