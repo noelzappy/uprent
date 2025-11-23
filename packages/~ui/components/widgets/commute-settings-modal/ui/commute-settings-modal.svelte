@@ -124,7 +124,7 @@
                     setTimeout(() => (showSuggestions[index] = false), 200)
                   }}
                   placeholder="Enter address..."
-                  class={inputStyle}
+                  class={inputStyle + ' .pl-9'}
                 />
 
                 {#if showSuggestions[index] && filteredSuggestions[index]?.length > 0}
